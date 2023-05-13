@@ -1,13 +1,7 @@
 package App::Job;
 
 use 5.010001;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 1 $ =~ /\d+/gmx );
-
-use Class::Usul::Constants;
-use Class::Usul::Functions  qw( throw );
-use Moo;
-
-extends 'Class::Usul::Programs';
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 2 $ =~ /\d+/gmx );
 
 use namespace::autoclean;
 
