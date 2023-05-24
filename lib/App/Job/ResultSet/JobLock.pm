@@ -1,7 +1,8 @@
 package App::Job::ResultSet::JobLock;
 
 use HTML::StateTable::Constants qw( COL_INFO_TYPE_ATTR FALSE TRUE );
-use HTML::StateTable::Types     qw( ArrayRef Bool Int ResultRole Str Undef );
+use HTML::StateTable::Types     qw( ArrayRef Bool Int LoadableClass
+                                    ResultRole Str Undef );
 use Data::Page;
 use Moo;
 use MooX::HandlesVia;
@@ -36,7 +37,8 @@ has 'paging' =>
    default => FALSE,
    writer  => '_set_paging';
 
-has 'result_class' => is => 'ro', required => TRUE;
+has 'result_class' => is => 'ro', isa => LoadableClass, coerce => TRUE,
+   default => 'App::Job::Result::JobLock',
 
 has '_results' =>
    is          => 'lazy',
@@ -78,6 +80,10 @@ sub column_info {
    }
 
    return { $attr => 'TEXT' };
+}
+
+sub count {
+   return shift->total_results;
 }
 
 sub index_start {

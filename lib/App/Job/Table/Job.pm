@@ -6,22 +6,11 @@ use HTML::StateTable::Moo;
 
 extends 'HTML::StateTable';
 with    'HTML::StateTable::Role::Configurable';
-with    'HTML::StateTable::Role::Searchable';
-with    'HTML::StateTable::Role::CheckAll';
 with    'HTML::StateTable::Role::Form';
-with    'HTML::StateTable::Role::Active';
 
 has '+caption' => default => 'Jobs List';
 
 has '+configurable_control_location' => default => 'TopRight';
-
-has '+configurable_dialog_close' => default => sub {
-   return shift->context->request->uri_for('img/cancel.svg')->as_string;
-};
-
-has '+configurable_label' => default => sub {
-   return shift->context->request->uri_for('img/tune.svg')->as_string;
-};
 
 has '+form_control_location' => default => 'BottomRight';
 
@@ -35,10 +24,20 @@ has_column 'id' =>
    width       => '3rem';
 
 has_column 'name' =>
-   label      => 'Job Name',
-   searchable => TRUE,
-   sortable   => TRUE,
-   title      => 'Sort by job';
+   sortable => TRUE,
+   title    => 'Sort by job';
+
+has_column 'created' => cell_traits => ['DateTime'];
+
+has_column 'updated' => cell_traits => ['DateTime'];
+
+has_column 'run' => cell_traits => ['Numeric'], label => 'Run #';
+
+has_column 'max_runs' => cell_traits => ['Numeric'], label => 'Max. Runs';
+
+has_column 'period' => cell_traits => ['Numeric'];
+
+has_column 'command';
 
 has_column 'check' =>
    cell_traits => ['Checkbox'],

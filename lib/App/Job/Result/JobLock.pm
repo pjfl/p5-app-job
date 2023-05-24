@@ -1,45 +1,24 @@
-package App::Job::Table::JobLock;
+package App::Job::Result::JobLock;
 
-use HTML::StateTable::Constants qw( FALSE NUL SPC TABLE_META TRUE );
-use App::Job::ResultSet::JobLock;
+use Class::Usul::Time       qw( time2str );
+use HTML::StateTable::Types qw( Int Str );
 use Moo;
-use HTML::StateTable::Moo;
 
-extends 'HTML::StateTable';
-with    'HTML::StateTable::Role::CheckAll';
-with    'HTML::StateTable::Role::Form';
+with 'HTML::StateTable::Result::Role';
 
-has '+caption' => default => 'Job Locks';
-
-has '+paging' => default => FALSE;
-
-has '+form_control_location' => default => 'BottomRight';
-
-has 'jobdaemon' => is => 'ro', required => TRUE;
-
-set_table_name 'joblocks';
-
-setup_resultset sub {
-   my $self  = shift;
-   my $class = 'App::Job::ResultSet::JobLock';
-
-   return $class->new(daemon => $self->jobdaemon, table => $self);
+has 'stime' => is => 'ro', isa => Str, init_arg => undef, default => sub {
+   return time2str '%Y-%m-%d %H:%M:%S', shift->_stime;
 };
 
-has_column 'key';
+has '_stime', => is => 'ro', isa => Int, init_arg => 'stime';
 
-has_column 'pid' => cell_traits => ['Numeric'], label => 'PID';
+has 'key' => is => 'ro', isa => Str;
 
-has_column 'stime' => cell_traits => ['DateTime'], label => 'Set Time';
+has 'pid' => is => 'ro', isa => Int;
 
-has_column 'timeout' => cell_traits => ['Numeric'];
+has 'timeout' => is => 'ro', isa => Int;
 
-has_column 'check' =>
-   cell_traits => ['Checkbox'],
-   label       => SPC,
-   value       => 'key';
-
-use namespace::autoclean -except => TABLE_META;
+use namespace::autoclean;
 
 1;
 
@@ -51,11 +30,11 @@ __END__
 
 =head1 Name
 
-App::Job::Table::JobLock - One-line description of the modules purpose
+App::Job::Result::JobLock - One-line description of the modules purpose
 
 =head1 Synopsis
 
-   use App::Job::Table::JobLock;
+   use App::Job::Result::JobLock;
    # Brief but working code examples
 
 =head1 Description

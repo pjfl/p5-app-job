@@ -49,7 +49,7 @@ Defines the following attributes;
 
 has 'max_wait' => is => 'ro', isa => PositiveInt, default => 10;
 
-=item prefix
+=item C<prefix>
 
 =cut
 
