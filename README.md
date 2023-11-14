@@ -1,25 +1,30 @@
 # Name
 
-App::Job - One-line description of the modules purpose
+App::Job - Low latency non polling job system
 
 # Synopsis
 
     use App::Job;
-    # Brief but working code examples
 
 # Description
 
+Low latency non polling job system
+
 # Configuration and Environment
 
-Defines the following attributes;
+Defines no public attributes
 
 # Subroutines/Methods
 
+Defines no public methods
+
 # Diagnostics
+
+None
 
 # Dependencies
 
-- [Class::Usul](https://metacpan.org/pod/Class%3A%3AUsul)
+- [version](https://metacpan.org/pod/version)
 
 # Incompatibilities
 

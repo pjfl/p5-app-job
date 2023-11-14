@@ -2,26 +2,23 @@ package App::Job::Daemon;
 
 use App::Job; our $VERSION = App::Job->VERSION;
 
-use Class::Usul::Constants qw( COMMA EXCEPTION_CLASS FALSE NUL OK SPC TRUE );
-use Class::Usul::Functions qw( emit get_user is_member throw );
-use Class::Usul::Time      qw( nap now_dt time2str );
-use Class::Usul::Types     qw( NonEmptySimpleStr Object PositiveInt Str );
-use English                qw( -no_match_vars );
-use File::DataClass::Types qw( Path );
-use IO::Socket::UNIX       qw( SOCK_DGRAM );
-use Scalar::Util           qw( blessed );
-use Type::Utils            qw( class_type );
-use Unexpected::Functions  qw( Unspecified );
+use Class::Usul::Cmd::Constants qw( COMMA EXCEPTION_CLASS FALSE NUL OK SPC
+                                    TRUE );
+use Class::Usul::Cmd::Util      qw( emit get_user is_member nap now_dt tempdir
+                                    throw time2str );
+use Class::Usul::Cmd::Types     qw( NonEmptySimpleStr Object PositiveInt Str );
+use English                     qw( -no_match_vars );
+use File::DataClass::Types      qw( Path );
+use IO::Socket::UNIX            qw( SOCK_DGRAM );
+use Scalar::Util                qw( blessed );
+use Type::Utils                 qw( class_type );
+use Unexpected::Functions       qw( Unspecified );
 use Try::Tiny;
 use Daemon::Control;
 use Moo;
-use Class::Usul::Options;
+use Class::Usul::Cmd::Options;
 
-extends q(Class::Usul);
-with    q(Class::Usul::TraitFor::OutputLogging);
-with    q(Class::Usul::TraitFor::Prompting);
-with    q(Class::Usul::TraitFor::Usage);
-with    q(Class::Usul::TraitFor::RunningMethods);
+extends q(Class::Usul::Cmd);
 
 =pod
 
@@ -39,7 +36,7 @@ App::Job::Daemon - One-line description of the modules purpose
 
 =head1 Configuration and Environment
 
-Defines the following attributes;
+Defines the following public attributes;
 
 =over 3
 
@@ -53,29 +50,38 @@ has 'max_wait' => is => 'ro', isa => PositiveInt, default => 10;
 
 =cut
 
-has 'prefix' => is => 'lazy', isa => Str,
+has 'prefix' =>
+   is      => 'lazy',
+   isa     => Str,
    default => sub { (split m{ :: }mx, blessed(shift))[-1] };
 
 =item C<read_socket>
 
 =cut
 
-has 'read_socket' => is => 'lazy', isa => Object, default => sub {
-   my $self   = shift;
-   my $path   = $self->_socket_path;
-   my $socket = IO::Socket::UNIX->new(Local => "${path}", Type => SOCK_DGRAM);
+has 'read_socket' =>
+   is      => 'lazy',
+   isa     => Object,
+   default => sub {
+      my $self   = shift;
+      my $path   = $self->_socket_path;
+      my $socket = IO::Socket::UNIX->new(
+         Local => "${path}", Type => SOCK_DGRAM
+      );
 
-   throw 'Cannot bind to socket [_1]: [_2]', [$path, $OS_ERROR]
-      unless defined $socket;
+      throw 'Cannot bind to socket [_1]: [_2]', [$path, $OS_ERROR]
+         unless defined $socket;
 
-   return $socket;
-};
+      return $socket;
+   };
 
 =item C<schema>
 
 =cut
 
-has 'schema' => is => 'lazy', isa => class_type('DBIx::Class::Schema'),
+has 'schema' =>
+   is      => 'lazy',
+   isa     => class_type('DBIx::Class::Schema'),
    default => sub {
       my $self   = shift;
       my $class  = $self->config->schema_class;
@@ -90,7 +96,10 @@ has 'schema' => is => 'lazy', isa => class_type('DBIx::Class::Schema'),
 
 =cut
 
-has 'socket_ctime' => is => 'rwp', isa => PositiveInt, lazy => TRUE,
+has 'socket_ctime' =>
+   is      => 'rwp',
+   isa     => PositiveInt,
+   lazy    => TRUE,
    default => sub {
       my $self = shift;
       my $path = $self->_socket_path;
@@ -99,29 +108,35 @@ has 'socket_ctime' => is => 'rwp', isa => PositiveInt, lazy => TRUE,
    };
 
 # Private attributes
-has '_daemon_control' => is => 'lazy', isa => Object, default => sub {
-   my $self = shift;
-   my $conf = $self->config;
-   my $prog = $conf->bin->catfile($self->_program_name);
-   my $args = {
-      name         => blessed $self || $self,
-      path         => $prog->pathname,
+has '_daemon_control' =>
+   is      => 'lazy',
+   isa     => Object,
+   default => sub {
+      my $self = shift;
+      my $conf = $self->config;
+      my $prog = $conf->bin->catfile($self->_program_name);
+      my $args = {
+         name         => blessed $self || $self,
+         path         => $prog->pathname,
 
-      directory    => $conf->appldir,
-      program      => $prog,
-      program_args => ['rundaemon'],
+         directory    => $conf->appldir,
+         program      => $prog,
+         program_args => ['rundaemon'],
 
-      pid_file     => $self->_pid_file->pathname,
-      stderr_file  => $self->_stdio_file('err'),
-      stdout_file  => $self->_stdio_file('out'),
+         pid_file     => $self->_pid_file->pathname,
+         stderr_file  => $self->_stdio_file('err'),
+         stdout_file  => $self->_stdio_file('out'),
 
-      fork         => 2,
+         fork         => 2,
+      };
+
+      return Daemon::Control->new($args);
    };
 
-   return Daemon::Control->new($args);
-};
-
-has '_daemon_pid' => is => 'lazy', isa => PositiveInt, clearer => TRUE,
+has '_daemon_pid' =>
+   is      => 'lazy',
+   isa     => PositiveInt,
+   clearer => TRUE,
    default => sub {
       my $self = shift;
       my $path = $self->_pid_file;
@@ -129,43 +144,61 @@ has '_daemon_pid' => is => 'lazy', isa => PositiveInt, clearer => TRUE,
       return (($path->exists && !$path->empty ? $path->getline : 0) // 0);
    };
 
-has '_last_run_path' => is => 'lazy', isa => Path, default => sub {
-   my $self = shift;
-   my $file = $self->_program_name.'.last_run';
+has '_last_run_path' =>
+   is      => 'lazy',
+   isa     => Path,
+   default => sub {
+      my $self = shift;
+      my $file = $self->_program_name.'.last_run';
 
-   return $self->config->tempdir->catfile($file)->chomp->lock;
-};
+      return $self->config->tempdir->catfile($file)->chomp->lock;
+   };
 
-has '_pid_file' => is => 'lazy', isa => Path, default => sub {
-   my $self = shift;
+has '_pid_file' =>
+   is      => 'lazy',
+   isa     => Path,
+   default => sub {
+      my $self = shift;
 
-   return $self->config->rundir->catfile($self->_program_name.'.pid')->chomp;
-};
+      return $self->config->rundir->catfile($self->_program_name.'.pid')->chomp;
+   };
 
-has '_program_name' => is => 'lazy', isa => NonEmptySimpleStr,
+has '_program_name' =>
+   is      => 'lazy',
+   isa     => NonEmptySimpleStr,
    default => sub { shift->config->prefix . '-jobserver' };
 
-has '_socket_path' => is => 'lazy', isa => Path, default => sub {
-   my $self = shift;
+has '_socket_path' =>
+   is      => 'lazy',
+   isa     => Path,
+   default => sub {
+      my $self = shift;
 
-   return $self->config->tempdir->catfile($self->_program_name.'.sock');
-};
+      return $self->config->tempdir->catfile($self->_program_name.'.sock');
+   };
 
-has '_write_socket' => is => 'lazy', isa => Object, clearer => TRUE,
-   init_arg => 'write_socket', builder => '_build_write_socket';
+has '_write_socket' =>
+   is       => 'lazy',
+   isa      => Object,
+   clearer  => TRUE,
+   init_arg => 'write_socket',
+   builder  => '_build_write_socket';
 
-has '_version_path' => is => 'lazy', isa => Path, default => sub {
-   my $self = shift;
-   my $file = $self->_program_name.'.version';
+has '_version_path' =>
+   is      => 'lazy',
+   isa     => Path,
+   default => sub {
+      my $self = shift;
+      my $file = $self->_program_name.'.version';
 
-   return $self->config->tempdir->catfile($file)->chomp->lock;
-};
+      return $self->config->tempdir->catfile($file)->chomp->lock;
+   };
 
 =back
 
 =head1 Subroutines/Methods
 
-Defines the following methods;
+Defines the following public methods;
 
 =over 3
 
@@ -695,7 +728,7 @@ sub _stdio_file {
 
    $name //= $self->_program_name;
 
-   return $self->file->tempdir->catfile("${name}.${extn}");
+   return tempdir($self)->catfile("${name}.${extn}");
 }
 
 sub _write_version {
@@ -724,7 +757,7 @@ None
 
 =over 3
 
-=item L<Class::Usul>
+=item L<Class::Usul::Cmd>
 
 =item L<Daemon::Control>
 

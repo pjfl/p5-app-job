@@ -1,6 +1,6 @@
 package App::Job::Form::JobStatus;
 
-use Class::Usul::Time      qw( time2str );
+use Class::Usul::Cmd::Util qw( time2str );
 use HTML::Forms::Constants qw( FALSE META SPC TRUE );
 use HTML::Forms::Types     qw( ArrayRef );
 use Moo;
@@ -61,8 +61,11 @@ has_field 'last_run' => type => 'Display';
 
 has_field 'last_job' => type => 'Display';
 
-before 'after_build' => sub {
-   my $self     = shift;
+around 'after_build_fields' => sub {
+   my ($orig, $self) = @_;
+
+   $orig->($self);
+
    my $daemon   = $self->jobdaemon;
    my $running  = $daemon->is_running;
    my $last_job = (split SPC, $daemon->last_run)[-1];
@@ -119,7 +122,7 @@ Defines the following attributes;
 
 =over 3
 
-=item L<Class::Usul>
+=item L<HTML::Forms>
 
 =back
 

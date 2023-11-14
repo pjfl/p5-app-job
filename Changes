@@ -1,5 +1,6 @@
 Revision history for App::Job
 
+          - Switched dependency to Class::Usul::Cmd
           - Feature complete
           - Added form and tables
 

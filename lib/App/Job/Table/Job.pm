@@ -10,6 +10,8 @@ with    'HTML::StateTable::Role::Form';
 
 has '+caption' => default => 'Jobs List';
 
+has '+configurable_action' => default => 'api/table_preference';
+
 has '+configurable_control_location' => default => 'TopRight';
 
 has '+form_control_location' => default => 'BottomRight';
@@ -81,7 +83,7 @@ Defines the following attributes;
 
 =over 3
 
-=item L<Class::Usul>
+=item L<HTML::StateTable>
 
 =back
 

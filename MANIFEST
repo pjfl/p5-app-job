@@ -4,6 +4,7 @@ MANIFEST
 lib/App/Job.pm
 lib/App/Job/Daemon.pm
 lib/App/Job/Form/JobStatus.pm
+lib/App/Job/Result/JobLock.pm
 lib/App/Job/ResultSet/JobLock.pm
 lib/App/Job/Table/Job.pm
 lib/App/Job/Table/JobLock.pm

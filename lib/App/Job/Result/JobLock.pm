@@ -1,6 +1,6 @@
 package App::Job::Result::JobLock;
 
-use Class::Usul::Time       qw( time2str );
+use Class::Usul::Cmd::Util  qw( time2str );
 use HTML::StateTable::Types qw( Int Str );
 use Moo;
 
@@ -55,7 +55,7 @@ Defines the following attributes;
 
 =over 3
 
-=item L<Class::Usul>
+=item L<HTML::StateTable>
 
 =back
 

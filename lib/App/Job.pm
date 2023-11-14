@@ -1,7 +1,7 @@
 package App::Job;
 
 use 5.010001;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 3 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 4 $ =~ /\d+/gmx );
 
 use namespace::autoclean;
 
@@ -15,32 +15,33 @@ __END__
 
 =head1 Name
 
-App::Job - One-line description of the modules purpose
+App::Job - Low latency non polling job system
 
 =head1 Synopsis
 
    use App::Job;
-   # Brief but working code examples
 
 =head1 Description
 
+Low latency non polling job system
+
 =head1 Configuration and Environment
 
-Defines the following attributes;
-
-=over 3
-
-=back
+Defines no public attributes
 
 =head1 Subroutines/Methods
 
+Defines no public methods
+
 =head1 Diagnostics
+
+None
 
 =head1 Dependencies
 
 =over 3
 
-=item L<Class::Usul>
+=item L<version>
 
 =back
 
