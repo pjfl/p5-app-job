@@ -4,9 +4,9 @@ use App::Job; our $VERSION = App::Job->VERSION;
 
 use Class::Usul::Cmd::Constants qw( COMMA EXCEPTION_CLASS FALSE NUL OK SPC
                                     TRUE );
+use Class::Usul::Cmd::Types     qw( NonEmptySimpleStr Object PositiveInt Str );
 use Class::Usul::Cmd::Util      qw( emit get_user is_member nap now_dt tempdir
                                     throw time2str );
-use Class::Usul::Cmd::Types     qw( NonEmptySimpleStr Object PositiveInt Str );
 use English                     qw( -no_match_vars );
 use File::DataClass::Types      qw( Path );
 use IO::Socket::UNIX            qw( SOCK_DGRAM );
@@ -149,7 +149,7 @@ has '_last_run_path' =>
    isa     => Path,
    default => sub {
       my $self = shift;
-      my $file = $self->_program_name.'.last_run';
+      my $file = $self->_program_name . '.last_run';
 
       return $self->config->tempdir->catfile($file)->chomp->lock;
    };
@@ -174,7 +174,7 @@ has '_socket_path' =>
    default => sub {
       my $self = shift;
 
-      return $self->config->tempdir->catfile($self->_program_name.'.sock');
+      return $self->config->tempdir->catfile($self->_program_name . '.sock');
    };
 
 has '_write_socket' =>
@@ -682,7 +682,7 @@ sub _daemon_loop {
          my $line = time2str( '%Y-%m-%d %H:%M:%S' ) . SPC . $job->label;
 
          $self->_last_run_path->println($line);
-         $self->_last_run_path->close;
+         $self->_last_run_path->flush->close;
       }
    }
 

@@ -1,5 +1,6 @@
 Revision history for App::Job
 
+          - Moved config control to BottomRight
           - Switched dependency to Class::Usul::Cmd
           - Feature complete
           - Added form and tables
