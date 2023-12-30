@@ -241,11 +241,12 @@ sub clear : method {
    throw 'Cannot clear whilst running' if $self->is_running;
 
    my $prefix = $self->prefix;
+   my $pid = $self->next_argv || $self->_daemon_pid;
 
-   try { $self->lock->reset(k => "${prefix}_semaphore", p => 666)  } catch {};
-   try { $self->lock->reset(k => "${prefix}_starting",  p => 666)  } catch {};
-   try { $self->lock->reset(k => "${prefix}_stopping",  p => 666)  } catch {};
-   try { $self->lock->reset(k => $prefix, p => $self->_daemon_pid) } catch {};
+   try { $self->lock->reset(k => "${prefix}_semaphore", p => $pid)  } catch {};
+   try { $self->lock->reset(k => "${prefix}_starting",  p => $pid)  } catch {};
+   try { $self->lock->reset(k => "${prefix}_stopping",  p => $pid)  } catch {};
+   try { $self->lock->reset(k => $prefix, p => $pid) } catch { warn $_ };
 
    $self->_pid_file->unlink if $self->_pid_file->exists;
 
