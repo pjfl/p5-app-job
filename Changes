@@ -1,5 +1,6 @@
 Revision history for App::Job
 
+          - Adjusted buttons on JobStatus form
           - Can set the pid on the command line for clear locks
           - Moved config control to BottomRight
           - Switched dependency to Class::Usul::Cmd

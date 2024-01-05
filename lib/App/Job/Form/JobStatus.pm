@@ -27,22 +27,22 @@ has 'model_fields' => is => 'lazy', isa => ArrayRef, default => sub {
       },
       'start' => {
          html_name => 'submit', label => 'Start', type => 'Button',
-         value     => 'start', wrapper_class => ['inline input-button']
+         value     => 'start', wrapper_class => ['inline input-button right']
       }
    ] unless $self->jobdaemon->is_running;
 
    return [
+      'trigger' => {
+         html_name => 'submit', label => 'Trigger', type => 'Button',
+         value     => 'trigger', wrapper_class => ['inline input-button']
+      },
       'restart' => {
          html_name => 'submit', label => 'Restart', type => 'Button',
          value     => 'restart', wrapper_class => ['inline input-button']
       },
       'stop' => {
          html_name => 'submit', label => 'Stop', type => 'Button',
-         value     => 'stop', wrapper_class => ['inline input-button']
-      },
-      'trigger' => {
-         html_name => 'submit', label => 'Trigger', type => 'Button',
-         value     => 'trigger', wrapper_class => ['inline input-button']
+         value     => 'stop', wrapper_class => ['inline input-button right']
       },
    ];
 };
