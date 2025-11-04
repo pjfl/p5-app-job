@@ -23,6 +23,7 @@ set_table_name 'job';
 has_column 'id' =>
    cell_traits => ['Numeric'],
    label       => 'ID',
+   sortable    => TRUE,
    width       => '3rem';
 
 has_column 'name' =>

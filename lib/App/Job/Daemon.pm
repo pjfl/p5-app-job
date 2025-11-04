@@ -587,7 +587,7 @@ sub _runjob {
       my $opts = { err => 'out', timeout => $job->period - 60 };
       my $r    = $self->run_cmd([split SPC, $job->command], $opts);
 
-      $self->log->info($r->out, $self);
+      $self->log->info($r->out, $self) if $r->rv > 0;
       $self->log->info("Job ${label} rv " . $r->rv, $self);
       $job->delete;
    }
