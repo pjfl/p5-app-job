@@ -40,7 +40,7 @@ has_column 'max_runs' => cell_traits => ['Numeric'], label => 'Max. Runs';
 
 has_column 'period' => cell_traits => ['Numeric'];
 
-has_column 'command';
+has_column 'command' => cell_traits => ['Remainder'];
 
 has_column 'check' =>
    cell_traits => ['Checkbox'],

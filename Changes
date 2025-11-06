@@ -1,5 +1,6 @@
 Revision history for App::Job
 
+          - Adds Remainder trait to Job table command column
           - Makes id column on jobs table sortable
           - Adjusted buttons on JobStatus form
           - Can set the pid on the command line for clear locks
