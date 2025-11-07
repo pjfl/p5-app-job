@@ -1,6 +1,7 @@
 package App::Job::Table::Job;
 
 use HTML::StateTable::Constants qw( FALSE NUL SPC TABLE_META TRUE );
+use Time::Duration              qw( concise duration );
 use Moo;
 use HTML::StateTable::Moo;
 
@@ -38,7 +39,13 @@ has_column 'run' => cell_traits => ['Numeric'], label => 'Run #';
 
 has_column 'max_runs' => cell_traits => ['Numeric'], label => 'Max. Runs';
 
-has_column 'period' => cell_traits => ['Numeric'];
+has_column 'period' =>
+   cell_traits => ['Numeric'],
+   filter      => sub {
+      my ($value, $cell) = @_;
+
+      return concise(duration($value));
+   };
 
 has_column 'command' => cell_traits => ['Remainder'];
 
