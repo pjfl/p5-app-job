@@ -1,5 +1,6 @@
 Revision history for App::Job
 
+          - Added datetime class to fields in status form
           - Displays retry period as a consise duration
           - Adds Remainder trait to Job table command column
           - Makes id column on jobs table sortable

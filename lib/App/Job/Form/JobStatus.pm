@@ -9,27 +9,14 @@ use HTML::Forms::Moo;
 extends 'HTML::Forms';
 with    'HTML::Forms::Role::Defaults';
 
-has '+title'               => default => 'Job System';
-has '+default_wrapper_tag' => default => 'fieldset';
-has '+do_form_wrapper'     => default => TRUE;
-has '+fields_from_model'   => default => TRUE;
-has '+info_message'        => default => 'Current status';
+has '+title'             => default => 'Job System';
+has '+fields_from_model' => default => TRUE;
+has '+info_message'      => default => 'Current status';
 
 has 'jobdaemon' => is => 'ro', required => TRUE;
 
 has 'model_fields' => is => 'lazy', isa => ArrayRef, default => sub {
    my $self = shift;
-
-   return [
-      'clear' => {
-         html_name => 'submit', label => 'Clear Locks', type => 'Button',
-         value     => 'clear', wrapper_class => ['inline input-button']
-      },
-      'start' => {
-         html_name => 'submit', label => 'Start', type => 'Button',
-         value     => 'start', wrapper_class => ['inline input-button right']
-      }
-   ] unless $self->jobdaemon->is_running;
 
    return [
       'trigger' => {
@@ -44,6 +31,17 @@ has 'model_fields' => is => 'lazy', isa => ArrayRef, default => sub {
          html_name => 'submit', label => 'Stop', type => 'Button',
          value     => 'stop', wrapper_class => ['inline input-button right']
       },
+   ] if $self->jobdaemon->is_running;
+
+   return [
+      'clear' => {
+         html_name => 'submit', label => 'Clear Locks', type => 'Button',
+         value     => 'clear', wrapper_class => ['inline input-button']
+      },
+      'start' => {
+         html_name => 'submit', label => 'Start', type => 'Button',
+         value     => 'start', wrapper_class => ['inline input-button right']
+      }
    ];
 };
 
@@ -55,9 +53,9 @@ has_field 'running_v' => type => 'Display', label => 'Running version';
 
 has_field 'daemon_pid' => type => 'Display';
 
-has_field 'start_time' => type => 'Display';
+has_field 'start_time' => type => 'Display' => element_class => ['datetime'];
 
-has_field 'last_run' => type => 'Display';
+has_field 'last_run' => type => 'Display' => element_class => ['datetime'];
 
 has_field 'last_job' => type => 'Display';
 
