@@ -47,15 +47,18 @@ has 'model_fields' => is => 'lazy', isa => ArrayRef, default => sub {
 
 has_field 'is_running' => type => 'Display';
 
-has_field 'app_version' => type => 'Display';
+has_field 'app_version' => type => 'Display', element_class => ['version'];
 
-has_field 'running_v' => type => 'Display', label => 'Running version';
+has_field 'running_v' =>
+   type          => 'Display',
+   element_class => ['version'],
+   label         => 'Running version';
 
-has_field 'daemon_pid' => type => 'Display';
+has_field 'daemon_pid' => type => 'Display', element_class => ['identity'];
 
-has_field 'start_time' => type => 'Display' => element_class => ['datetime'];
+has_field 'start_time' => type => 'Display', element_class => ['datetime'];
 
-has_field 'last_run' => type => 'Display' => element_class => ['datetime'];
+has_field 'last_run' => type => 'Display', element_class => ['datetime'];
 
 has_field 'last_job' => type => 'Display';
 

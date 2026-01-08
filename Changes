@@ -1,5 +1,6 @@
 Revision history for App::Job
 
+          - Changed action path for configurable_action
           - Added datetime class to fields in status form
           - Displays retry period as a consise duration
           - Adds Remainder trait to Job table command column
