@@ -4,12 +4,12 @@ use App::Job; our $VERSION = App::Job->VERSION;
 
 use Class::Usul::Cmd::Constants qw( COMMA EXCEPTION_CLASS FALSE NUL OK SPC
                                     TRUE );
+use IO::Socket::UNIX            qw( SOCK_DGRAM );
 use Class::Usul::Cmd::Types     qw( NonEmptySimpleStr Object PositiveInt Str );
+use File::DataClass::Types      qw( Path );
 use Class::Usul::Cmd::Util      qw( emit get_user is_member nap now_dt tempdir
                                     throw time2str );
 use English                     qw( -no_match_vars );
-use File::DataClass::Types      qw( Path );
-use IO::Socket::UNIX            qw( SOCK_DGRAM );
 use Scalar::Util                qw( blessed );
 use Type::Utils                 qw( class_type );
 use Unexpected::Functions       qw( Unspecified );
@@ -189,7 +189,7 @@ has '_version_path' =>
    isa     => Path,
    default => sub {
       my $self = shift;
-      my $file = $self->_program_name.'.version';
+      my $file = $self->_program_name . '.version';
 
       return $self->config->tempdir->catfile($file)->chomp->lock;
    };
@@ -580,7 +580,7 @@ sub _runjob {
    my $label = $job->label;
 
    try {
-      $self->log->info("Running job ${label}", $self);
+      $self->log->info("Job ${label} running", $self);
       $job->run($job->run + 1);
       $job->update;
 
@@ -588,13 +588,13 @@ sub _runjob {
       my $r    = $self->run_cmd([split SPC, $job->command], $opts);
 
       $self->log->info($r->out, $self) if $r->rv > 0;
-      $self->log->info("Job ${label} rv " . $r->rv, $self);
+      $self->log->info("Job ${label} finished rv " . $r->rv, $self);
       $job->delete;
    }
    catch {
       my ($msg) = split m{ \n }mx, "${_}";
 
-      $self->log->error("Job ${label} rv " . $_->rv . ": ${msg}", $self);
+      $self->log->error("Job ${label} failed rv " . $_->rv . ": ${msg}", $self);
 
       if ($job->run + 1 > $job->max_runs) {
          $self->log->error("Job ${label} killed max. retries exceeded", $self);
@@ -654,7 +654,7 @@ sub _wait_while_stopping {
 }
 
 sub _daemon_loop {
-   my $self = shift;
+   my $self     = shift;
    my $stopping = FALSE;
 
    while (!$stopping) {
@@ -698,9 +698,9 @@ sub _rundaemon {
 
    $self->log->debug('Trying to start the job daemon', $self);
 
-   my $lock = $self->lock;
+   my $lock   = $self->lock;
    my $prefix = $self->prefix;
-   my $pid  = $PID;
+   my $pid    = $PID;
 
    $self->_set_started_lock($lock, $prefix, $pid);
    $self->log->info("Started job daemon ${pid}", $self);
