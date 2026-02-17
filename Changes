@@ -1,5 +1,6 @@
 Revision history for App::Job
 
+          - Changed job table column order to reflect label value
           - Cosmetic code update
           - Changed action path for configurable_action
           - Added datetime class to fields in status form

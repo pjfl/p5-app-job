@@ -21,21 +21,21 @@ has '+page_size_control_location' => default => 'BottomLeft';
 
 set_table_name 'job';
 
+has_column 'name' =>
+   sortable => TRUE,
+   title    => 'Sort by job';
+
 has_column 'id' =>
    cell_traits => ['Numeric'],
    label       => 'ID',
    sortable    => TRUE,
    width       => '3rem';
 
-has_column 'name' =>
-   sortable => TRUE,
-   title    => 'Sort by job';
+has_column 'run' => cell_traits => ['Numeric'], label => 'Run #';
 
 has_column 'created' => cell_traits => ['DateTime'];
 
 has_column 'updated' => cell_traits => ['DateTime'];
-
-has_column 'run' => cell_traits => ['Numeric'], label => 'Run #';
 
 has_column 'max_runs' => cell_traits => ['Numeric'], label => 'Max. Runs';
 

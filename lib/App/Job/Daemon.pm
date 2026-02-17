@@ -570,6 +570,7 @@ sub _raise_semaphore {
 sub _runjob {
    my ($self, $job_id) = @_;
 
+   my $expected_rv = 0;
    my $job;
 
    unless ($job = $self->schema->resultset('Job')->find($job_id)) {
@@ -587,14 +588,13 @@ sub _runjob {
       my $opts = { err => 'out', timeout => $job->period - 60 };
       my $r    = $self->run_cmd([split SPC, $job->command], $opts);
 
-      $self->log->info($r->out, $self) if $r->rv > 0;
+      throw 'Return value greater than expected' if $r->rv > $expected_rv;
+
       $self->log->info("Job ${label} finished rv " . $r->rv, $self);
       $job->delete;
    }
    catch {
-      my ($msg) = split m{ \n }mx, "${_}";
-
-      $self->log->error("Job ${label} failed rv " . $_->rv . ": ${msg}", $self);
+      $self->log->error("Job ${label} failed rv " . $_->rv , $self);
 
       if ($job->run + 1 > $job->max_runs) {
          $self->log->error("Job ${label} killed max. retries exceeded", $self);
