@@ -48,11 +48,14 @@ has 'max_wait' => is => 'ro', isa => PositiveInt, default => 10;
 
 =item C<prefix>
 
+Prepended to all lock keys
+
 =cut
 
-has 'prefix' =>
+option 'prefix' =>
    is      => 'lazy',
    isa     => Str,
+   format  => 's',
    default => sub { (split m{ :: }mx, blessed(shift))[-1] };
 
 =item C<read_socket>
@@ -74,6 +77,12 @@ has 'read_socket' =>
 
       return $socket;
    };
+
+=item C<result_class>
+
+=cut
+
+has 'result_class' => is => 'ro', isa => Str, default => 'Job';
 
 =item C<schema>
 
@@ -555,7 +564,7 @@ sub _lower_semaphore {
 
 sub _raise_semaphore {
    my $self   = shift;
-   my $prefix   = $self->prefix;
+   my $prefix = $self->prefix;
    my $socket = $self->write_socket or throw 'No write socket';
 
    return FALSE unless $self->lock->set(
@@ -570,21 +579,22 @@ sub _raise_semaphore {
 sub _runjob {
    my ($self, $job_id) = @_;
 
-   my $expected_rv = 0;
+   my $expected_rv  = 0;
+   my $result_class = $self->result_class;
    my $job;
 
-   unless ($job = $self->schema->resultset('Job')->find($job_id)) {
+   unless ($job = $self->schema->resultset($result_class)->find($job_id)) {
       $self->log->error("Job ${job_id} unknown", $self);
       return OK;
    }
 
    my $label = $job->label;
 
-   try {
-      $self->log->info("Job ${label} running", $self);
-      $job->run($job->run + 1);
-      $job->update;
+   $self->log->info("Job ${label} running", $self);
+   $job->run($job->run + 1);
+   $job->update;
 
+   try {
       my $opts = { err => 'out', timeout => $job->period - 60 };
       my $r    = $self->run_cmd([split SPC, $job->command], $opts);
 
@@ -626,18 +636,20 @@ sub _set_started_lock {
 sub _should_run_job {
    my ($self, $job) = @_;
 
-   return FALSE if $job->updated
-      and $job->updated->clone->add(seconds => $job->period) > now_dt;
+   return TRUE unless $job->updated;
+
+   my $should_run = $job->updated->clone->add(seconds => $job->period);
+
+   return TRUE if now_dt > $should_run;
 
    if ($job->run + 1 > $job->max_runs) {
-      $self->log->error(
-         'Job ' . $job->label . ' killed max. retries exceeded', $self
-      );
+      my $message = 'Job ' . $job->label . ' killed max. retries exceeded';
+
+      $self->log->error($message, $self);
       $job->delete;
-      return FALSE;
    }
 
-   return TRUE;
+   return FALSE;
 }
 
 sub _wait_while_stopping {
@@ -654,22 +666,22 @@ sub _wait_while_stopping {
 }
 
 sub _daemon_loop {
-   my $self     = shift;
-   my $stopping = FALSE;
+   my $self         = shift;
+   my $stopping     = FALSE;
+   my $result_class = $self->result_class;
 
    while (!$stopping) {
       $self->_lower_semaphore;
 
-      for my $job ($self->schema->resultset('Job')->search({})->all) {
+      for my $job ($self->schema->resultset($result_class)->search({})->all) {
          if ($job->command eq 'stop_jobdaemon') {
-            $job->delete;
             $stopping = TRUE;
+            $job->delete;
             last;
          }
 
          next unless $self->_should_run_job($job);
 
-         $job->updated(now_dt);
          $job->update;
 
          try {
@@ -680,7 +692,7 @@ sub _daemon_loop {
          }
          catch { $self->log->error($_, $self) };
 
-         my $line = time2str( '%Y-%m-%d %H:%M:%S' ) . SPC . $job->label;
+         my $line = time2str('%Y-%m-%d %H:%M:%S') . SPC . $job->label;
 
          $self->_last_run_path->println($line);
          $self->_last_run_path->flush->close;

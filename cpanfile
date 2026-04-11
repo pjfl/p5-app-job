@@ -9,6 +9,7 @@ requires "HTML::Forms" => "v0.1.41";
 requires "HTML::StateTable" => "v0.1.50";
 requires "Moo" => "2.005005";
 requires "MooX::HandlesVia" => "0.001009";
+requires "Time::Duration" => "1.21";
 requires "Try::Tiny" => "0.31";
 requires "Type::Tiny" => "2.002001";
 requires "Unexpected" => "v1.0.5";
