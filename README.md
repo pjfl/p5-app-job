@@ -6,9 +6,13 @@ App::Job - Low latency non polling job system
 
     use App::Job;
 
+# Version
+
+Describes version v0.1.$Rev: 16 $ of [App::Job](https://metacpan.org/pod/App%3A%3AJob)
+
 # Description
 
-Low latency non polling job system
+Low latency non polling job system. See [Job Daemon](https://metacpan.org/pod/App%3A%3AJob%3A%3ADaemon)
 
 # Configuration and Environment
 

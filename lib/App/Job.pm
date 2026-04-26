@@ -1,7 +1,7 @@
 package App::Job;
 
 use 5.010001;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 15 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 16 $ =~ /\d+/gmx );
 
 use namespace::autoclean;
 
@@ -21,9 +21,13 @@ App::Job - Low latency non polling job system
 
    use App::Job;
 
+=head1 Version
+
+Describes version v0.1.$Rev: 16 $ of L<App::Job>
+
 =head1 Description
 
-Low latency non polling job system
+Low latency non polling job system. See L<Job Daemon|App::Job::Daemon>
 
 =head1 Configuration and Environment
 

@@ -1,5 +1,6 @@
 Revision history for App::Job
 
+          - Some POD
           - Cleaner time processing
           - Changed job table column order to reflect label value
           - Cosmetic code update

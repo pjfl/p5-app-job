@@ -26,13 +26,16 @@ extends q(Class::Usul::Cmd);
 
 =head1 Name
 
-App::Job::Daemon - One-line description of the modules purpose
+App::Job::Daemon - Service control interface
 
 =head1 Synopsis
 
    use App::Job::Daemon;
 
 =head1 Description
+
+Command line interface to L<Daemon::Control>. Start/stop the job server
+which runs as an OS level service
 
 =head1 Configuration and Environment
 
@@ -41,6 +44,9 @@ Defines the following public attributes;
 =over 3
 
 =item C<max_wait>
+
+A positive integer. Maximum time in seconds to wait for a response. Defaults
+to ten
 
 =cut
 
@@ -59,6 +65,8 @@ option 'prefix' =>
    default => sub { (split m{ :: }mx, blessed(shift))[-1] };
 
 =item C<read_socket>
+
+An instance of L<IO::Socket::UNIX>
 
 =cut
 
@@ -80,11 +88,16 @@ has 'read_socket' =>
 
 =item C<result_class>
 
+A string which defaults to C<Job>. The name of the L<result|DBIx::Class::Core>
+object
+
 =cut
 
 has 'result_class' => is => 'ro', isa => Str, default => 'Job';
 
 =item C<schema>
+
+An instance of L<DBIx::Class::Schema>
 
 =cut
 
@@ -102,6 +115,8 @@ has 'schema' =>
    };
 
 =item C<socket_ctime>
+
+The creation time of the socket file
 
 =cut
 
@@ -213,12 +228,16 @@ Defines the following public methods;
 
 =item C<BUILD>
 
+Does nothing
+
 =cut
 
 # Construction
 sub BUILD {}
 
 =item C<run>
+
+Dispatch to the method requested from the command line
 
 =cut
 
@@ -264,6 +283,8 @@ sub clear : method {
 
 =item C<daemon_pid>
 
+The process ID of the running daemon
+
 =cut
 
 sub daemon_pid {
@@ -283,6 +304,8 @@ sub daemon_pid {
 
 =item C<is_running>
 
+Is the daemon process running?
+
 =cut
 
 sub is_running {
@@ -292,6 +315,8 @@ sub is_running {
 }
 
 =item C<last_run>
+
+String representation of the time the daemon last ran a job
 
 =cut
 
@@ -334,6 +359,8 @@ sub rundaemon : method {
 }
 
 =item C<running_version>
+
+Return the version number of the running daemon
 
 =cut
 
@@ -464,6 +491,8 @@ sub trigger : method {
 }
 
 =item C<write_socket>
+
+A UNIX socket. This is connected to the read socket
 
 =cut
 
